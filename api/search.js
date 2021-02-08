@@ -83,19 +83,136 @@ phrases.import(index_phrases, { serialize: false });
 const end = new Date();
 console.log("index Time: %d ms", end - start);
 
-module.exports = (req, res) => {
-  console.log(req.query);
+function search(query, targets) {
   var result = [];
+  if (typeof targets === "string") {
+    targets = targets.split(",");
+  }
+
+  targets.forEach((target) => {
+    switch (target) {
+      case "title":
+        result = result.concat(titles.search(query));
+        break;
+      case "meaning":
+        result = result.concat(meanings.search(query));
+        break;
+      case "orth":
+        result = result.concat(orths.search(query));
+        break;
+      case "sense":
+        result = result.concat(senses.search(query));
+        break;
+      case "equiv":
+        result = result.concat(equivs.search(query));
+        break;
+      case "phrase":
+        result = result.concat(phrases.search(query));
+        break;
+    }
+  });
+  return result.sort((a, b) => a.wordid - b.wordid);
+}
+
+function make_result(query, searchs) {
+  let lastid = -1;
+  var item;
+  let data = [];
+  searchs.forEach((x) => {
+    const word = source[x.wordid];
+    if (x.wordid != lastid) {
+      item = {
+        wordid: x.wordid,
+        title: word.cf,
+        gw: word.gw,
+        pos: word.pos,
+        url: word.url,
+        id: word.id,
+        orth: [],
+        senses: [],
+        equivs: [],
+        phrases: {},
+        rank: 0,
+      };
+      lastid = x.wordid;
+      data.push(item);
+    }
+
+    let cal_rank = (val) => {
+      return Math.abs(val.length - query.length) / val.length;
+    };
+
+    let i, j, line;
+    switch (x.tag) {
+      case "title":
+        item.rank += 200 * cal_rank(item.title);
+        break;
+      case "meaning":
+        item.rank += 50 * cal_rank(item.gw);
+        break;
+      case "cf":
+        item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
+        item.orth.push(word.orth[x.index]);
+        break;
+      case "w":
+        item.rank += 10 * cal_rank(word.orth[x.index].w);
+        item.orth.push(word.orth[x.index]);
+        break;
+      case "sense":
+        item.rank += 10 * cal_rank(word.senses[x.index]);
+        item.senses.push(word.senses[x.index]);
+        break;
+      case "equivs":
+        item.rank += 10 * cal_rank(word.equivs[x.index]);
+        item.equivs.push(word.equivs[x.index]);
+        break;
+      case "phrase_title":
+        if (!item.phrases[x.index]) {
+          item.phrases[x.index] = {
+            title: word.phrases[x.index].title,
+            lines: [],
+          };
+          item.rank += 10 * cal_rank(word.phrases[x.index].title);
+        }
+        break;
+      case "phrase_sumer":
+      case "phrase_akkad":
+        i = x.index[0];
+        j = x.index[1];
+        if (!item.phrases[i]) {
+          item.phrases[i] = {
+            title: word.phrases[i].title,
+            lines: [],
+          };
+        }
+        line = {
+          sum: word.phrases[i].lines[j].sum,
+          akk: word.phrases[i].lines[j].akk,
+        };
+        item.phrases[i].lines.push(line);
+        item.rank += 5;
+        break;
+    }
+  });
+  return data.sort((a, b) => b.rank - a.rank);
+}
+
+module.exports = (req, res) => {
+  const query = req.query.text || "";
+  const targets = req.query.targets || [
+    "title",
+    "meaning",
+    "othts",
+    "senses",
+    "equivs",
+    "phrases",
+  ];
+  console.log(req.query);
   const startTime = new Date();
-  result = result.concat(titles.search(req.query.text));
-  result = result.concat(orths.search(req.query.text));
-  result = result.concat(senses.search(req.query.text));
-  result = result.concat(meanings.search(req.query.text));
-  result = result.concat(equivs.search(req.query.text));
-  result = result.concat(phrases.search(req.query.text));
-  result = result.sort((a, b) => a.wordid - b.wordid);
-  console.log(result.length);
+  let searchs = search(query, targets);
+  let data = make_result(query, searchs);
+
   const endTime = new Date();
   console.log(endTime - startTime);
-  res.json({ count: result.length, time: endTime - startTime });
+  res.json(data);
 };

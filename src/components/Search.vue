@@ -9,11 +9,7 @@
       </b-field>
 
       <div class="block">
-        <b-field
-          grouped
-          label="Search field"
-          message="What do you want search?"
-        >
+        <b-field label="Search field" grouped group-multiline>
           <b-checkbox v-model="searchTarget" native-value="title">
             Title
           </b-checkbox>
@@ -94,43 +90,12 @@
 </template>
 
 <script>
-const FlexSearch = require("flexsearch");
-const indexjson = require("../assets/searchindex.json");
-const epsd2 = require("../assets/epsd2_src.json");
 import _ from "lodash";
 import Mark from "mark.js";
 import Orthography from "../components/Orthography.vue";
 import Sense from "../components/Sense.vue";
 import Equivs from "../components/Equivs.vue";
 import Phrase from "../components/Phrase.vue";
-
-function encoder(value) {
-  value = value.toLowerCase();
-  value = value.replace(/ŋ/g, "j");
-  value = value.replace(/š/g, "sz");
-  value = value.replace(/ṣ/g, "s,");
-  value = value.replace(/ṭ/g, "t");
-  value = value.replace(/ḫ/g, "h");
-  value = value.replace(/ḫ/g, "h");
-  value = value.replace(/[āâ]/g, "a");
-  value = value.replace(/[îī]/g, "i");
-  value = value.replace(/[ûū]/g, "u");
-  value = value.replace(/[êē]/g, "e");
-
-  value = value.replace(/₀/g, "0");
-  value = value.replace(/₁/g, "1");
-  value = value.replace(/₂/g, "2");
-  value = value.replace(/₃/g, "3");
-  value = value.replace(/₄/g, "4");
-  value = value.replace(/₅/g, "5");
-  value = value.replace(/₆/g, "6");
-  value = value.replace(/₇/g, "7");
-  value = value.replace(/₈/g, "8");
-  value = value.replace(/₉/g, "9");
-  value = value.replace(/ₓ/g, "x");
-
-  return value;
-}
 
 export default {
   name: "Search",
@@ -156,134 +121,49 @@ export default {
       this.debouncedSearch();
     },
   },
-  mounted() {
-    this.index = FlexSearch.create({
-      encode: encoder,
-      depth: 3,
-      doc: {
-        id: "id",
-        field: {
-          content: {
-            encode: encoder,
-            split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
-          },
-          cuneiform: {
-            encode: false,
-            split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
-            tokenize: "full",
-          },
-        },
-        store: ["wordid", "tag", "index"],
-      },
-    });
-    this.index.import(JSON.stringify(indexjson));
-  },
+  mounted() {},
 
   methods: {
     incrementalSearch: function() {
-      let data = [];
-      if (this.input.length >= 2) {
-        let searchs = this.index.search(this.input, {
-          sort: "wordid",
-        });
-
-        let lastid = -1;
-        var item;
-        searchs.forEach((x) => {
-          const word = epsd2[x.wordid];
-          if (x.wordid != lastid) {
-            item = {
-              wordid: x.wordid,
-              title: word.cf,
-              gw: word.gw,
-              pos: word.pos,
-              url: word.url,
-              id: word.id,
-              orth: [],
-              senses: [],
-              equivs: [],
-              phrases: {},
-              rank: 0,
-            };
-            lastid = x.wordid;
-            data.push(item);
+      let input = this.input;
+      const query = new URLSearchParams({
+        text: input,
+        targets: this.searchTarget,
+      });
+      console.log(query);
+      fetch("/api/search?" + query)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          if (input !== this.input) {
+            console.log("cancel:%s, %s", input, this.input);
+            return;
           }
+          console.log(data);
+          this.results = data;
 
-          let cal_rank = (val) => {
-            return Math.abs(val.length - this.input.length) / val.length;
+          let mark = (index) => {
+            if (input !== this.input) return;
+            if (index < this.resultView.length) {
+              var instance = new Mark("#result_" + index);
+              instance.unmark({
+                done: () => {
+                  instance.mark(this.input, {
+                    done: () => setTimeout(() => mark(index + 1), 10),
+                  });
+                },
+              });
+            }
           };
 
-          let i, j, line;
-          switch (x.tag) {
-            case "title":
-              item.rank += 200 * cal_rank(item.title);
-              break;
-            case "meaning":
-              item.rank += 50 * cal_rank(item.gw);
-              break;
-            case "cf":
-              item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
-              item.orth.push(word.orth[x.index]);
-              break;
-            case "w":
-              item.rank += 10 * cal_rank(word.orth[x.index].w);
-              item.orth.push(word.orth[x.index]);
-              break;
-            case "sense":
-              item.rank += 10 * cal_rank(word.senses[x.index]);
-              item.senses.push(word.senses[x.index]);
-              break;
-            case "equivs":
-              item.rank += 10 * cal_rank(word.equivs[x.index]);
-              item.equivs.push(word.equivs[x.index]);
-              break;
-            case "phrase_title":
-              if (!item.phrases[x.index]) {
-                item.phrases[x.index] = {
-                  title: word.phrases[x.index].title,
-                  lines: [],
-                };
-                item.rank += 10 * cal_rank(word.phrases[x.index].title);
-              }
-              break;
-            case "phrase_sumer":
-            case "phrase_akkad":
-              i = x.index[0];
-              j = x.index[1];
-              if (!item.phrases[i]) {
-                item.phrases[i] = {
-                  title: word.phrases[i].title,
-                  lines: [],
-                };
-              }
-              line = {
-                sum: word.phrases[i].lines[j].sum,
-                akk: word.phrases[i].lines[j].akk,
-              };
-              item.phrases[i].lines.push(line);
-              item.rank += 5;
-              break;
-          }
+          setTimeout(() => {
+            mark(0);
+          }, 10);
+        })
+        .catch((error) => {
+          console.log(error);
         });
-      }
-      this.results = data.sort((a, b) => b.rank - a.rank);
-
-      let mark = (index) => {
-        if (index < this.resultView.length) {
-          var instance = new Mark("#result_" + index);
-          instance.unmark({
-            done: () => {
-              instance.mark(this.input, {
-                done: () => setTimeout(() => mark(index + 1), 10),
-              });
-            },
-          });
-        }
-      };
-
-      setTimeout(() => {
-        mark(0);
-      }, 10);
     },
   },
   computed: {
