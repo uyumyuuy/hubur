@@ -1,6 +1,6 @@
 const FlexSearch = require("flexsearch");
 const fs = require("fs");
-const src = require("../api/epsd2_src.json");
+const src = require("../src/assets/epsd2_src.json");
 
 let encoder = function(value) {
   value = value.toLowerCase();
@@ -39,14 +39,18 @@ var options = {
       content: {
         encode: encoder,
         split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
+        stemmer: false,
+        filter: false,
       },
       cuneiform: {
         encode: false,
         split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
         tokenize: "full",
+        stemmer: false,
+        filter: false,
       },
     },
-    store: ["wordid", "tag", "index", "content", "cuneiform"],
+    store: ["wordid", "tag", "index", "cuneiform"],
   },
 };
 
@@ -152,20 +156,32 @@ fs.writeFileSync(__dirname + "/../api/index_titles.json", titles.export());
 
 console.log("meanings");
 console.log(meanings.info());
-fs.writeFileSync(__dirname + "/../api/index_meanings.json", meanings.export());
+fs.writeFileSync(
+  __dirname + "/../src/assets/index_meanings.json",
+  meanings.export()
+);
 
 console.log("orths");
 console.log(orths.info());
-fs.writeFileSync(__dirname + "/../api/index_orths.json", orths.export());
+fs.writeFileSync(__dirname + "/../src/assets/index_orths.json", orths.export());
 
 console.log("senses");
 console.log(senses.info());
-fs.writeFileSync(__dirname + "/../api/index_senses.json", senses.export());
+fs.writeFileSync(
+  __dirname + "/../src/assets/index_senses.json",
+  senses.export()
+);
 
 console.log("equivs");
 console.log(equivs.info());
-fs.writeFileSync(__dirname + "/../api/index_equivs.json", equivs.export());
+fs.writeFileSync(
+  __dirname + "/../src/assets/index_equivs.json",
+  equivs.export()
+);
 
 console.log("phrases");
 console.log(phrases.info());
-fs.writeFileSync(__dirname + "/../api/index_phrases.json", phrases.export());
+fs.writeFileSync(
+  __dirname + "/../src/assets/index_phrases.json",
+  phrases.export()
+);

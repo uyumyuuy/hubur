@@ -27,10 +27,11 @@
           </b-checkbox>
         </b-field>
       </div>
-      <p>{{ results.length }} word found.</p>
+      <p>{{ totalFound }} word found.</p>
     </section>
 
     <section class="block">
+      <b-pagination v-model="page" :total="maxPage" :per-page="1" />
       <div class="columns">
         <div class="column is-narrow is-hidden-mobile">
           <ul>
@@ -85,6 +86,7 @@
           </ul>
         </div>
       </div>
+      <b-pagination v-model="page" :total="maxPage" :per-page="1" />
     </section>
   </div>
 </template>
@@ -101,10 +103,14 @@ export default {
   name: "Search",
   data() {
     return {
+      searchCount: 0,
       input: "",
       index: null,
       results: [],
-      searchTarget: ["title", "meaning", "orth", "sense", "phrase"],
+      totalFound: 0,
+      maxPage: 0,
+      page: 0,
+      searchTarget: ["title", "meaning", "orth", "sense"],
     };
   },
   components: {
@@ -118,6 +124,13 @@ export default {
   },
   watch: {
     input: function() {
+      this.page = 1;
+      this.debouncedSearch();
+    },
+    page: function() {
+      this.debouncedSearch();
+    },
+    searchTarget() {
       this.debouncedSearch();
     },
   },
@@ -125,10 +138,14 @@ export default {
 
   methods: {
     incrementalSearch: function() {
+      this.searchCount++;
+      let count = this.searchCount;
       let input = this.input;
       const query = new URLSearchParams({
         text: input,
         targets: this.searchTarget,
+        page: this.page - 1,
+        perpage: 20,
       });
       console.log(query);
       fetch("/api/search?" + query)
@@ -136,15 +153,17 @@ export default {
           return response.json();
         })
         .then((data) => {
-          if (input !== this.input) {
-            console.log("cancel:%s, %s", input, this.input);
+          if (count !== this.searchCount) {
+            console.log("cancel:%s, %s", count, this.searchCount);
             return;
           }
           console.log(data);
-          this.results = data;
+          this.maxPage = data.maxpage;
+          this.results = data.data;
+          this.totalFound = data.total;
 
           let mark = (index) => {
-            if (input !== this.input) return;
+            if (count !== this.searchCount) return;
             if (index < this.resultView.length) {
               var instance = new Mark("#result_" + index);
               instance.unmark({

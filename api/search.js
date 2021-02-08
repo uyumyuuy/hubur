@@ -49,11 +49,15 @@ const options = {
       content: {
         encode: encoder,
         split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
+        stemmer: false,
+        filter: false,
       },
       cuneiform: {
         encode: false,
         split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
         tokenize: "full",
+        stemmer: false,
+        filter: false,
       },
     },
     store: ["wordid", "tag", "index"],
@@ -92,22 +96,28 @@ function search(query, targets) {
   targets.forEach((target) => {
     switch (target) {
       case "title":
-        result = result.concat(titles.search(query));
+        result = result.concat(titles.search(query, 100000));
+        console.debug(`title:${result.length}`);
         break;
       case "meaning":
-        result = result.concat(meanings.search(query));
+        result = result.concat(meanings.search(query, 100000));
+        console.debug(`meaning:${result.length}`);
         break;
       case "orth":
-        result = result.concat(orths.search(query));
+        result = result.concat(orths.search(query, 100000));
+        console.debug(`orth:${result.length}`);
         break;
       case "sense":
-        result = result.concat(senses.search(query));
+        result = result.concat(senses.search(query, 100000));
+        console.debug(`sense:${result.length}`);
         break;
       case "equiv":
-        result = result.concat(equivs.search(query));
+        result = result.concat(equivs.search(query, 100000));
+        console.debug(`equivs:${result.length}`);
         break;
       case "phrase":
-        result = result.concat(phrases.search(query));
+        result = result.concat(phrases.search(query, 100000));
+        console.debug(`phrase:${result.length}`);
         break;
     }
   });
@@ -139,7 +149,7 @@ function make_result(query, searchs) {
     }
 
     let cal_rank = (val) => {
-      return Math.abs(val.length - query.length) / val.length;
+      return 1 - Math.abs(val.length - query.length) / val.length;
     };
 
     let i, j, line;
@@ -155,6 +165,9 @@ function make_result(query, searchs) {
         item.orth.push(word.orth[x.index]);
         break;
       case "w":
+        if (x.wordid == "6934") {
+          console.log(word.orth[x.index].w);
+        }
         item.rank += 10 * cal_rank(word.orth[x.index].w);
         item.orth.push(word.orth[x.index]);
         break;
@@ -202,11 +215,13 @@ module.exports = (req, res) => {
   const targets = req.query.targets || [
     "title",
     "meaning",
-    "othts",
-    "senses",
-    "equivs",
-    "phrases",
+    "orth",
+    "sense",
+    "equiv",
+    "phrase",
   ];
+  const page = Number(req.query.page) || 0;
+  const perpage = Number(req.query.perpage) || 50;
   console.log(req.query);
   const startTime = new Date();
   let searchs = search(query, targets);
@@ -214,5 +229,10 @@ module.exports = (req, res) => {
 
   const endTime = new Date();
   console.log(endTime - startTime);
-  res.json(data);
+  res.json({
+    total: data.length,
+    page: page,
+    maxpage: Math.ceil(data.length / perpage),
+    data: data.slice(page * perpage, (page + 1) * perpage),
+  });
 };
