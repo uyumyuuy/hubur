@@ -1,5 +1,16 @@
+const importStart = new Date();
 import FlexSearch from "flexsearch";
 import index_titles from "../src/assets/index_titles.json";
+import index_meanings from "../src/assets/index_meanings.json";
+import index_orths from "../src/assets/index_orths.json";
+import index_phrases from "../src/assets/index_phrases.json";
+import index_senses from "../src/assets/index_senses.json";
+import index_equivs from "../src/assets/index_equivs.json";
+
+import source from "../src/assets/epsd2_src.json";
+
+const importEnd = new Date();
+console.log("Import Time: %d", importEnd - importStart);
 
 function encoder(value) {
   value = value.toLowerCase();
@@ -48,10 +59,43 @@ const options = {
     store: ["wordid", "tag", "index"],
   },
 };
+
+const start = new Date();
+
 const titles = new FlexSearch(Object.assign({}, options));
 titles.import(index_titles, { serialize: false });
 
+const meanings = new FlexSearch(Object.assign({}, options));
+meanings.import(index_meanings, { serialize: false });
+
+const orths = new FlexSearch(Object.assign({}, options));
+orths.import(index_orths, { serialize: false });
+
+const senses = new FlexSearch(Object.assign({}, options));
+senses.import(index_senses, { serialize: false });
+
+const equivs = new FlexSearch(Object.assign({}, options));
+equivs.import(index_equivs, { serialize: false });
+
+const phrases = new FlexSearch(Object.assign({}, options));
+phrases.import(index_phrases, { serialize: false });
+
+const end = new Date();
+console.log("index Time: %d ms", end - start);
+
 module.exports = (req, res) => {
   console.log(req.query);
-  res.json(titles.search(req.query.text));
+  var result = [];
+  const startTime = new Date();
+  result = result.concat(titles.search(req.query.text));
+  result = result.concat(orths.search(req.query.text));
+  result = result.concat(senses.search(req.query.text));
+  result = result.concat(meanings.search(req.query.text));
+  result = result.concat(equivs.search(req.query.text));
+  result = result.concat(phrases.search(req.query.text));
+  result = result.sort((a, b) => a.wordid - b.wordid);
+  console.log(result.length);
+  const endTime = new Date();
+  console.log(endTime - startTime);
+  res.json({ count: result.length, time: endTime - startTime });
 };
