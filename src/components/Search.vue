@@ -185,7 +185,11 @@ export default {
                   re = re.replace(/8/g, "(8|₈)");
                   re = re.replace(/9/g, "(9|₉)");
                   re = re.replace(/x/g, "(x|ₓ)");
-                  re = new RegExp(re);
+                  re = re.replace(/a/g, "[aāâ]");
+                  re = re.replace(/i/g, "[iîī]");
+                  re = re.replace(/u/g, "[uûū]");
+                  re = re.replace(/e/g, "[eêē]");
+                  re = new RegExp(re, "gi");
                   instance.markRegExp(re, {
                     done: () => setTimeout(() => mark(index + 1), 10),
                   });
