@@ -4,11 +4,17 @@
       <b-navbar spaced shadow>
         <template #brand>
           <b-navbar-item>
-            <span>Kurnugia</span>
+            <span>Ḫubur</span>
           </b-navbar-item>
         </template>
         <template #start>
-          <b-navbar-item href="https://kurnugia.com">Blog</b-navbar-item>
+          <b-navbar-item href="https://blog.kurnugia.com">Blog</b-navbar-item>
+          <b-navbar-item href="https://app.kurnugia.com"
+            >KUR.NU.GI4.A</b-navbar-item
+          >
+          <b-navbar-item href="https://qantuppi.kurnugia.com"
+            >qantuppi</b-navbar-item
+          >
         </template>
         <template #end> </template>
       </b-navbar>
