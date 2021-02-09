@@ -168,7 +168,25 @@ export default {
               var instance = new Mark("#result_" + index);
               instance.unmark({
                 done: () => {
-                  instance.mark(this.input, {
+                  var re = this.input;
+                  re = re.replace(/sz/g, "(sz|š)");
+                  re = re.replace(/j/g, "(j|ŋ)");
+                  re = re.replace(/s,/g, "(s,|ṣ)");
+                  re = re.replace(/t,/g, "(t,|ṭ)");
+                  re = re.replace(/h/g, "(h|ḫ)");
+                  re = re.replace(/0/g, "(0|₀)");
+                  re = re.replace(/1/g, "(1|₁)");
+                  re = re.replace(/2/g, "(2|₂)");
+                  re = re.replace(/3/g, "(3|₃)");
+                  re = re.replace(/4/g, "(4|₄)");
+                  re = re.replace(/5/g, "(5|₅)");
+                  re = re.replace(/6/g, "(6|₆)");
+                  re = re.replace(/7/g, "(7|₇)");
+                  re = re.replace(/8/g, "(8|₈)");
+                  re = re.replace(/9/g, "(9|₉)");
+                  re = re.replace(/x/g, "(x|ₓ)");
+                  re = new RegExp(re);
+                  instance.markRegExp(re, {
                     done: () => setTimeout(() => mark(index + 1), 10),
                   });
                 },
