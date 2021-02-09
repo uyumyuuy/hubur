@@ -194,10 +194,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cuneiform {
-  font-family: "Segoe UI histric", "Noto Sans Cuneiform";
-}
-
 h4 {
   margin-top: 0.5rem;
   text-decoration: underline;

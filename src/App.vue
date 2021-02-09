@@ -10,7 +10,7 @@
         <template #start>
           <b-navbar-item href="https://blog.kurnugia.com">Blog</b-navbar-item>
           <b-navbar-item href="https://app.kurnugia.com"
-            >KUR.NU.GI4.A</b-navbar-item
+            >KUR.NU.GI₄.A</b-navbar-item
           >
           <b-navbar-item href="https://qantuppi.kurnugia.com"
             >qantuppi</b-navbar-item
@@ -62,5 +62,9 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+}
+
+.cuneiform {
+  font-family: "Segoe UI histric", "Noto Sans Cuneiform";
 }
 </style>
