@@ -97,27 +97,27 @@ function search(query, targets) {
     switch (target) {
       case "title":
         result = result.concat(titles.search(query, 100000));
-        console.debug(`title:${result.length}`);
+        console.log(`title:${result.length}`);
         break;
       case "meaning":
         result = result.concat(meanings.search(query, 100000));
-        console.debug(`meaning:${result.length}`);
+        console.log(`meaning:${result.length}`);
         break;
       case "orth":
         result = result.concat(orths.search(query, 100000));
-        console.debug(`orth:${result.length}`);
+        console.log(`orth:${result.length}`);
         break;
       case "sense":
         result = result.concat(senses.search(query, 100000));
-        console.debug(`sense:${result.length}`);
+        console.log(`sense:${result.length}`);
         break;
       case "equiv":
         result = result.concat(equivs.search(query, 100000));
-        console.debug(`equivs:${result.length}`);
+        console.log(`equivs:${result.length}`);
         break;
       case "phrase":
         result = result.concat(phrases.search(query, 100000));
-        console.debug(`phrase:${result.length}`);
+        console.log(`phrase:${result.length}`);
         break;
     }
   });

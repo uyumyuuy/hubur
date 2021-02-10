@@ -152,7 +152,10 @@ src.forEach((word, wordid) => {
 
 console.log("titles");
 console.log(titles.info());
-fs.writeFileSync(__dirname + "/../api/index_titles.json", titles.export());
+fs.writeFileSync(
+  __dirname + "/../src/assets/index_titles.json",
+  titles.export()
+);
 
 console.log("meanings");
 console.log(meanings.info());

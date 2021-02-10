@@ -20,7 +20,10 @@
             Orthography
           </b-checkbox>
           <b-checkbox v-model="searchTarget" native-value="sense">
-            Senses
+            Sense
+          </b-checkbox>
+          <b-checkbox v-model="searchTarget" native-value="equiv">
+            Equivalent
           </b-checkbox>
           <b-checkbox v-model="searchTarget" native-value="phrase">
             Phrase
@@ -99,6 +102,32 @@ import Sense from "../components/Sense.vue";
 import Equivs from "../components/Equivs.vue";
 import Phrase from "../components/Phrase.vue";
 
+function markRegex(keyword) {
+  var re = keyword.trim();
+  re = re.replace(/sz/g, "(sz|š)");
+  re = re.replace(/j/g, "(j|ŋ)");
+  re = re.replace(/s,/g, "(s,|ṣ)");
+  re = re.replace(/t,/g, "(t,|ṭ)");
+  re = re.replace(/h/g, "(h|ḫ)");
+  re = re.replace(/0/g, "(0|₀)");
+  re = re.replace(/1/g, "(1|₁)");
+  re = re.replace(/2/g, "(2|₂)");
+  re = re.replace(/3/g, "(3|₃)");
+  re = re.replace(/4/g, "(4|₄)");
+  re = re.replace(/5/g, "(5|₅)");
+  re = re.replace(/6/g, "(6|₆)");
+  re = re.replace(/7/g, "(7|₇)");
+  re = re.replace(/8/g, "(8|₈)");
+  re = re.replace(/9/g, "(9|₉)");
+  re = re.replace(/x/g, "(x|ₓ)");
+  re = re.replace(/a/g, "[aāâ]");
+  re = re.replace(/i/g, "[iîī]");
+  re = re.replace(/u/g, "[uûū]");
+  re = re.replace(/e/g, "[eêē]");
+  re = re.split(/\s+/).join(")|(");
+  return new RegExp(`(${re})`, "gi");
+}
+
 export default {
   name: "Search",
   data() {
@@ -110,7 +139,7 @@ export default {
       totalFound: 0,
       maxPage: 0,
       page: 0,
-      searchTarget: ["title", "meaning", "orth", "sense"],
+      searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
     };
   },
   components: {
@@ -168,29 +197,7 @@ export default {
               var instance = new Mark("#result_" + index);
               instance.unmark({
                 done: () => {
-                  var re = this.input;
-                  re = re.replace(/sz/g, "(sz|š)");
-                  re = re.replace(/j/g, "(j|ŋ)");
-                  re = re.replace(/s,/g, "(s,|ṣ)");
-                  re = re.replace(/t,/g, "(t,|ṭ)");
-                  re = re.replace(/h/g, "(h|ḫ)");
-                  re = re.replace(/0/g, "(0|₀)");
-                  re = re.replace(/1/g, "(1|₁)");
-                  re = re.replace(/2/g, "(2|₂)");
-                  re = re.replace(/3/g, "(3|₃)");
-                  re = re.replace(/4/g, "(4|₄)");
-                  re = re.replace(/5/g, "(5|₅)");
-                  re = re.replace(/6/g, "(6|₆)");
-                  re = re.replace(/7/g, "(7|₇)");
-                  re = re.replace(/8/g, "(8|₈)");
-                  re = re.replace(/9/g, "(9|₉)");
-                  re = re.replace(/x/g, "(x|ₓ)");
-                  re = re.replace(/a/g, "[aāâ]");
-                  re = re.replace(/i/g, "[iîī]");
-                  re = re.replace(/u/g, "[uûū]");
-                  re = re.replace(/e/g, "[eêē]");
-                  re = new RegExp(re, "gi");
-                  instance.markRegExp(re, {
+                  instance.markRegExp(markRegex(this.input), {
                     done: () => setTimeout(() => mark(index + 1), 10),
                   });
                 },
@@ -214,7 +221,11 @@ export default {
   },
 };
 </script>
-
+<style lang="scss">
+mark {
+  background: linear-gradient(transparent 80%, orange 80%);
+}
+</style>
 <style lang="scss" scoped>
 h4 {
   margin-top: 0.5rem;
