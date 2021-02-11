@@ -142,6 +142,7 @@ export default {
       page: 0,
       searching: false,
       searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
+      beginSearch: 0,
     };
   },
   components: {
@@ -169,6 +170,10 @@ export default {
 
   methods: {
     incrementalSearch: function() {
+      if (window.performance) {
+        this.beginSearch = performance.now();
+      }
+
       this.searchCount++;
       let count = this.searchCount;
       let input = this.input;
@@ -189,6 +194,20 @@ export default {
             console.log("cancel:%s, %s", count, this.searchCount);
             return;
           }
+
+          if (window.performance) {
+            let elapsed = Math.round(this.performance.now() - this.beginSearch);
+            this.$gtag.time({
+              name: "serch",
+              value: elapsed,
+              event_category: "Word Search",
+            });
+          }
+          this.$gtag.event("search", {
+            event_category: "engagement",
+            event_label: `${this.searchTarget}`,
+          });
+
           this.searching = false;
           console.log(data);
           this.maxPage = data.maxpage;

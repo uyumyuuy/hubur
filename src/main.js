@@ -1,5 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
+import VueGtag from "vue-gtag";
 import "./registerServiceWorker";
 import Buefy from "buefy";
 import "./assets/scss/app.scss";
@@ -45,6 +46,13 @@ Vue.component("vue-fontawesome", FontAwesomeIcon);
 Vue.use(Buefy, {
   defaultIconComponent: "vue-fontawesome",
   defaultIconPack: "fas",
+});
+
+Vue.use(VueGtag, {
+  config: {
+    id: "G-MQRP11FV0F",
+    params: {},
+  },
 });
 
 Vue.config.productionTip = false;
