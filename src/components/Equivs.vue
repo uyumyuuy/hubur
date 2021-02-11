@@ -12,8 +12,8 @@ export default {
 
 <style lang="sass" scoped>
 .equivs
-    margin-left: 2rem
-.italic
-    font-family: serif
+  margin-left: 2rem
+  .italic
+    font-family: ungkam,"Times New Roman", serif
     font-style: italic
 </style>

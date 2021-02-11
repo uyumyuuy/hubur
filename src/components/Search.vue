@@ -9,11 +9,7 @@
       </b-field>
 
       <div class="block">
-        <b-field
-          grouped
-          label="Search field"
-          message="What do you want search?"
-        >
+        <b-field label="Search field" grouped group-multiline>
           <b-checkbox v-model="searchTarget" native-value="title">
             Title
           </b-checkbox>
@@ -24,17 +20,22 @@
             Orthography
           </b-checkbox>
           <b-checkbox v-model="searchTarget" native-value="sense">
-            Senses
+            Sense
+          </b-checkbox>
+          <b-checkbox v-model="searchTarget" native-value="equiv">
+            Equivalent
           </b-checkbox>
           <b-checkbox v-model="searchTarget" native-value="phrase">
             Phrase
           </b-checkbox>
         </b-field>
       </div>
-      <p>{{ results.length }} word found.</p>
+      <p v-if="searching">finding...</p>
+      <p v-else>{{ totalFound }} words found.</p>
     </section>
 
     <section class="block">
+      <b-pagination v-model="page" :total="maxPage" :per-page="1" />
       <div class="columns">
         <div class="column is-narrow is-hidden-mobile">
           <ul>
@@ -89,14 +90,12 @@
           </ul>
         </div>
       </div>
+      <b-pagination v-model="page" :total="maxPage" :per-page="1" />
     </section>
   </div>
 </template>
 
 <script>
-const FlexSearch = require("flexsearch");
-const indexjson = require("../assets/searchindex.json");
-const epsd2 = require("../assets/epsd2_src.json");
 import _ from "lodash";
 import Mark from "mark.js";
 import Orthography from "../components/Orthography.vue";
@@ -104,42 +103,45 @@ import Sense from "../components/Sense.vue";
 import Equivs from "../components/Equivs.vue";
 import Phrase from "../components/Phrase.vue";
 
-function encoder(value) {
-  value = value.toLowerCase();
-  value = value.replace(/ŋ/g, "j");
-  value = value.replace(/š/g, "sz");
-  value = value.replace(/ṣ/g, "s,");
-  value = value.replace(/ṭ/g, "t");
-  value = value.replace(/ḫ/g, "h");
-  value = value.replace(/ḫ/g, "h");
-  value = value.replace(/[āâ]/g, "a");
-  value = value.replace(/[îī]/g, "i");
-  value = value.replace(/[ûū]/g, "u");
-  value = value.replace(/[êē]/g, "e");
-
-  value = value.replace(/₀/g, "0");
-  value = value.replace(/₁/g, "1");
-  value = value.replace(/₂/g, "2");
-  value = value.replace(/₃/g, "3");
-  value = value.replace(/₄/g, "4");
-  value = value.replace(/₅/g, "5");
-  value = value.replace(/₆/g, "6");
-  value = value.replace(/₇/g, "7");
-  value = value.replace(/₈/g, "8");
-  value = value.replace(/₉/g, "9");
-  value = value.replace(/ₓ/g, "x");
-
-  return value;
+function markRegex(keyword) {
+  var re = keyword.trim();
+  re = re.replace(/sz/g, "(sz|š)");
+  re = re.replace(/j/g, "(j|ŋ)");
+  re = re.replace(/s,/g, "(s,|ṣ)");
+  re = re.replace(/t,/g, "(t,|ṭ)");
+  re = re.replace(/h/g, "(h|ḫ)");
+  re = re.replace(/0/g, "(0|₀)");
+  re = re.replace(/1/g, "(1|₁)");
+  re = re.replace(/2/g, "(2|₂)");
+  re = re.replace(/3/g, "(3|₃)");
+  re = re.replace(/4/g, "(4|₄)");
+  re = re.replace(/5/g, "(5|₅)");
+  re = re.replace(/6/g, "(6|₆)");
+  re = re.replace(/7/g, "(7|₇)");
+  re = re.replace(/8/g, "(8|₈)");
+  re = re.replace(/9/g, "(9|₉)");
+  re = re.replace(/x/g, "(x|ₓ)");
+  re = re.replace(/a/g, "[aāâ]");
+  re = re.replace(/i/g, "[iîī]");
+  re = re.replace(/u/g, "[uûū]");
+  re = re.replace(/e/g, "[eêē]");
+  re = re.split(/\s+/).join(")|(");
+  return new RegExp(`(${re})`, "gi");
 }
 
 export default {
   name: "Search",
   data() {
     return {
+      searchCount: 0,
       input: "",
       index: null,
       results: [],
-      searchTarget: ["title", "meaning", "orth", "sense", "phrase"],
+      totalFound: 0,
+      maxPage: 0,
+      page: 0,
+      searching: false,
+      searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
     };
   },
   components: {
@@ -153,137 +155,67 @@ export default {
   },
   watch: {
     input: function() {
+      this.page = 1;
+      this.debouncedSearch();
+    },
+    page: function() {
+      this.debouncedSearch();
+    },
+    searchTarget() {
       this.debouncedSearch();
     },
   },
-  mounted() {
-    this.index = FlexSearch.create({
-      encode: encoder,
-      depth: 3,
-      doc: {
-        id: "id",
-        field: {
-          content: {
-            encode: encoder,
-            split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
-          },
-          cuneiform: {
-            encode: false,
-            split: "[!? .\\-{}<>()/⸢⸣\\[\\]]+",
-            tokenize: "full",
-          },
-        },
-        store: ["wordid", "tag", "index"],
-      },
-    });
-    this.index.import(JSON.stringify(indexjson));
-  },
+  mounted() {},
 
   methods: {
     incrementalSearch: function() {
-      let data = [];
-      if (this.input.length >= 2) {
-        let searchs = this.index.search(this.input, {
-          sort: "wordid",
-        });
-
-        let lastid = -1;
-        var item;
-        searchs.forEach((x) => {
-          const word = epsd2[x.wordid];
-          if (x.wordid != lastid) {
-            item = {
-              wordid: x.wordid,
-              title: word.cf,
-              gw: word.gw,
-              pos: word.pos,
-              url: word.url,
-              id: word.id,
-              orth: [],
-              senses: [],
-              equivs: [],
-              phrases: {},
-              rank: 0,
-            };
-            lastid = x.wordid;
-            data.push(item);
+      this.searchCount++;
+      let count = this.searchCount;
+      let input = this.input;
+      const query = new URLSearchParams({
+        text: input,
+        targets: this.searchTarget,
+        page: this.page - 1,
+        perpage: 20,
+      });
+      console.log(query);
+      this.searching = true;
+      fetch("/api/search?" + query)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          if (count !== this.searchCount) {
+            console.log("cancel:%s, %s", count, this.searchCount);
+            return;
           }
+          this.searching = false;
+          console.log(data);
+          this.maxPage = data.maxpage;
+          this.results = data.data;
+          this.totalFound = data.total;
 
-          let cal_rank = (val) => {
-            return Math.abs(val.length - this.input.length) / val.length;
+          let mark = (index) => {
+            if (count !== this.searchCount) return;
+            if (index < this.resultView.length) {
+              var instance = new Mark("#result_" + index);
+              instance.unmark({
+                done: () => {
+                  instance.markRegExp(markRegex(this.input), {
+                    done: () => setTimeout(() => mark(index + 1), 10),
+                  });
+                },
+              });
+            }
           };
 
-          let i, j, line;
-          switch (x.tag) {
-            case "title":
-              item.rank += 200 * cal_rank(item.title);
-              break;
-            case "meaning":
-              item.rank += 50 * cal_rank(item.gw);
-              break;
-            case "cf":
-              item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
-              item.orth.push(word.orth[x.index]);
-              break;
-            case "w":
-              item.rank += 10 * cal_rank(word.orth[x.index].w);
-              item.orth.push(word.orth[x.index]);
-              break;
-            case "sense":
-              item.rank += 10 * cal_rank(word.senses[x.index]);
-              item.senses.push(word.senses[x.index]);
-              break;
-            case "equivs":
-              item.rank += 10 * cal_rank(word.equivs[x.index]);
-              item.equivs.push(word.equivs[x.index]);
-              break;
-            case "phrase_title":
-              if (!item.phrases[x.index]) {
-                item.phrases[x.index] = {
-                  title: word.phrases[x.index].title,
-                  lines: [],
-                };
-                item.rank += 10 * cal_rank(word.phrases[x.index].title);
-              }
-              break;
-            case "phrase_sumer":
-            case "phrase_akkad":
-              i = x.index[0];
-              j = x.index[1];
-              if (!item.phrases[i]) {
-                item.phrases[i] = {
-                  title: word.phrases[i].title,
-                  lines: [],
-                };
-              }
-              line = {
-                sum: word.phrases[i].lines[j].sum,
-                akk: word.phrases[i].lines[j].akk,
-              };
-              item.phrases[i].lines.push(line);
-              item.rank += 5;
-              break;
-          }
+          setTimeout(() => {
+            mark(0);
+          }, 10);
+        })
+        .catch((error) => {
+          console.log(error);
         });
-      }
-      this.results = data.sort((a, b) => b.rank - a.rank);
-
-      let mark = (index) => {
-        if (index < this.resultView.length) {
-          var instance = new Mark("#result_" + index);
-          instance.unmark({
-            done: () => {
-              instance.mark(this.input, {
-                done: () => setTimeout(() => mark(index + 1), 10),
-              });
-            },
-          });
-        }
-      };
-
-      setTimeout(() => {
-        mark(0);
-      }, 10);
     },
   },
   computed: {
@@ -293,12 +225,12 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.cuneiform {
-  font-family: "Segoe UI histric", "Noto Sans Cuneiform";
+<style lang="scss">
+mark {
+  background: linear-gradient(transparent 80%, orange 80%);
 }
-
+</style>
+<style lang="scss" scoped>
 h4 {
   margin-top: 0.5rem;
   text-decoration: underline;

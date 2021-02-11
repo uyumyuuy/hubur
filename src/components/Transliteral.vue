@@ -41,3 +41,9 @@ export default {
   },
 };
 </script>
+
+<style lang="sass">
+.transliteral
+  font-size: 120%
+  font-family: ungkam, "Times New Roman", serif
+</style>
