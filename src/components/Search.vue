@@ -170,7 +170,9 @@ export default {
   methods: {
     incrementalSearch: function() {
       let searchStart = 0;
+      var performance;
       if (window.performance) {
+        performance = window.performance;
         searchStart = window.performance.now();
       }
 
@@ -195,8 +197,8 @@ export default {
             return;
           }
 
-          if (window.performance) {
-            let elapsed = Math.round(window.performance.now() - searchStart);
+          if (performance) {
+            let elapsed = Math.round(performance.now() - searchStart);
 
             console.log(elapsed);
             this.$gtag.time({
