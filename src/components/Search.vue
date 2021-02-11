@@ -169,6 +169,13 @@ export default {
 
   methods: {
     incrementalSearch: function() {
+      let searchStart = 0;
+      var performance;
+      if (window.performance) {
+        performance = window.performance;
+        searchStart = window.performance.now();
+      }
+
       this.searchCount++;
       let count = this.searchCount;
       let input = this.input;
@@ -189,6 +196,22 @@ export default {
             console.log("cancel:%s, %s", count, this.searchCount);
             return;
           }
+
+          if (performance) {
+            let elapsed = Math.round(performance.now() - searchStart);
+
+            console.log(elapsed);
+            this.$gtag.time({
+              name: "serch",
+              value: elapsed,
+              event_category: "Word Search",
+            });
+          }
+          this.$gtag.event("search", {
+            event_category: "engagement",
+            event_label: `${this.searchTarget}`,
+          });
+
           this.searching = false;
           console.log(data);
           this.maxPage = data.maxpage;
