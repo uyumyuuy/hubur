@@ -21,7 +21,7 @@
       <div class="container">
         <section class="hero">
           <div class="hero-body">
-            <p class="title"><span class="cuneiform">𒄷𒁓</span> Ḫubur</p>
+            <p class="title"><span class="cuneiform">𒄷𒁍𒌫</span> [Ḫubur]</p>
             <p class="subtitle">
               Unofficial EPSD2 Rapid Searcher
             </p>

@@ -5,7 +5,14 @@
         label="input search word"
         message=" (j=ŋ sz=š s,=ṣ t,=ṭ 0-9=₀-₉; '=alef)"
       >
-        <b-input type="text" v-model="input" />
+        <b-input
+          placeholder="hu bu ur2"
+          rounded
+          icon-pack="fas"
+          icon="search"
+          type="text"
+          v-model="input"
+        />
       </b-field>
 
       <div class="block">
