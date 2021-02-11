@@ -30,7 +30,8 @@
           </b-checkbox>
         </b-field>
       </div>
-      <p>{{ totalFound }} word found.</p>
+      <p v-if="searching">finding...</p>
+      <p v-else>{{ totalFound }} words found.</p>
     </section>
 
     <section class="block">
@@ -139,6 +140,7 @@ export default {
       totalFound: 0,
       maxPage: 0,
       page: 0,
+      searching: false,
       searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
     };
   },
@@ -177,6 +179,7 @@ export default {
         perpage: 20,
       });
       console.log(query);
+      this.searching = true;
       fetch("/api/search?" + query)
         .then((response) => {
           return response.json();
@@ -186,6 +189,7 @@ export default {
             console.log("cancel:%s, %s", count, this.searchCount);
             return;
           }
+          this.searching = false;
           console.log(data);
           this.maxPage = data.maxpage;
           this.results = data.data;
