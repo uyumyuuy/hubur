@@ -142,7 +142,6 @@ export default {
       page: 0,
       searching: false,
       searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
-      beginSearch: 0,
     };
   },
   components: {
@@ -170,8 +169,9 @@ export default {
 
   methods: {
     incrementalSearch: function() {
+      let searchStart = 0;
       if (window.performance) {
-        this.beginSearch = performance.now();
+        searchStart = window.performance.now();
       }
 
       this.searchCount++;
@@ -196,7 +196,9 @@ export default {
           }
 
           if (window.performance) {
-            let elapsed = Math.round(performance.now() - this.beginSearch);
+            let elapsed = Math.round(window.performance.now() - searchStart);
+
+            console.log(elapsed);
             this.$gtag.time({
               name: "serch",
               value: elapsed,
