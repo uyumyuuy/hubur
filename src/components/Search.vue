@@ -196,7 +196,7 @@ export default {
           }
 
           if (window.performance) {
-            let elapsed = Math.round(this.performance.now() - this.beginSearch);
+            let elapsed = Math.round(performance.now() - this.beginSearch);
             this.$gtag.time({
               name: "serch",
               value: elapsed,
