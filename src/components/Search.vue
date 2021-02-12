@@ -66,7 +66,7 @@
               <div class="box">
                 <header>
                   <p>
-                    <a :href="word.url" :id="'w' + wordIndex" target="blank">
+                    <a :href="word.url" :id="'w' + wordIndex" target="_blank">
                       {{ word.title }} [{{ word.gw }}] ({{ word.pos }})</a
                     >
                   </p>
