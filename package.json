@@ -7,7 +7,8 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
-    "vercel": "node_modules/.bin/vercel dev"
+    "vercel": "node_modules/.bin/vercel dev",
+    "index": "cd script & node make_index.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
