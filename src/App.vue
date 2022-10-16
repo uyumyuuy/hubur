@@ -36,7 +36,8 @@
         <p>
           This application uses the data provided by
           <a href="http://oracc.museum.upenn.edu/epsd2/index.html">ePSD2</a>(The
-          electronic Pennsylvania Sumerian Dictionary) under the
+          electronic Pennsylvania Sumerian Dictionary) v2.6 (2022-06-21) under
+          the
           <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
           license.
         </p>
