@@ -19,6 +19,7 @@
     "flexsearch": "^0.6.32",
     "mark.js": "^8.11.1",
     "register-service-worker": "^1.7.1",
+    "sass-loader": "^13.1.0",
     "vue": "^2.6.11",
     "vue-gtag": "^1.11.0"
   },
@@ -38,10 +39,8 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.0.3",
-    "node-sass": "^4.9.0",
     "prettier": "^2.4.1",
-    "sass": "^1.26.5",
-    "sass-loader": "^8.0.2",
+    "sass": "^1.55.0",
     "vercel": "^21.2.3",
     "vue-cli-plugin-buefy": "~0.3.8",
     "vue-template-compiler": "^2.6.11"
