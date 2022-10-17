@@ -35,7 +35,7 @@ h5
     margin-top: 1rem
     margin-left: 2rem
 .phrase :first-child
-    margin-top:0
+    margin-top: 0px
 
 .phrase-line
     margin-left: 2rem
