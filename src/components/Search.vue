@@ -109,6 +109,7 @@ import Orthography from "../components/Orthography.vue";
 import Sense from "../components/Sense.vue";
 import Equivs from "../components/Equivs.vue";
 import Phrase from "../components/Phrase.vue";
+import useURLQuery from "../useURLQuery";
 
 function markRegex(keyword) {
   var re = keyword.trim();
@@ -137,6 +138,7 @@ function markRegex(keyword) {
 }
 
 export default {
+  mixins: [useURLQuery],
   name: "Search",
   data() {
     return {
@@ -151,21 +153,29 @@ export default {
       searchTarget: ["title", "meaning", "orth", "sense", "equiv"],
     };
   },
+  urlSyncedData: {
+    input: {
+      type: String,
+    },
+  },
   components: {
     Orthography,
     Sense,
     Equivs,
     Phrase,
   },
-  created: function() {
+  created: function () {
     this.debouncedSearch = _.debounce(this.incrementalSearch, 200);
+    if (this.text) {
+      this.input = this.text;
+    }
   },
   watch: {
-    input: function() {
+    input: function () {
       this.page = 1;
       this.debouncedSearch();
     },
-    page: function() {
+    page: function () {
       this.debouncedSearch();
     },
     searchTarget() {
@@ -175,7 +185,7 @@ export default {
   mounted() {},
 
   methods: {
-    incrementalSearch: function() {
+    incrementalSearch: function () {
       let searchStart = 0;
       var performance;
       if (window.performance) {

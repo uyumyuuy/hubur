@@ -4,6 +4,7 @@ import VueGtag from "vue-gtag";
 import "./registerServiceWorker";
 import Buefy from "buefy";
 import "./assets/scss/app.scss";
+import router from "./router";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 // internal icons
@@ -43,7 +44,7 @@ library.add(
   faCaretUp,
   faUpload,
   faSearch,
-  faGithub
+  faGithub,
 );
 Vue.component("vue-fontawesome", FontAwesomeIcon);
 
@@ -62,5 +63,6 @@ Vue.use(VueGtag, {
 Vue.config.productionTip = false;
 
 new Vue({
+  router,
   render: (h) => h(App),
 }).$mount("#app");
