@@ -43,6 +43,7 @@
     "sass": "^1.55.0",
     "vercel": "^21.2.3",
     "vue-cli-plugin-buefy": "~0.3.8",
+    "vue-router": "3.6.5",
     "vue-template-compiler": "^2.6.11"
   }
 }
