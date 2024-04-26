@@ -77,7 +77,6 @@ function search(query) {
 }
 
 function make_result(query, searchs) {
-  let lastid = -1;
   var item;
   let data = [];
   searchs.forEach((x) => {

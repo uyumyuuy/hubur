@@ -4,6 +4,7 @@ export default {
     const urlParams = this.$route.query;
     Object.keys(this.urlSyncedData).forEach((key) => {
       // 同期対象パラメータを監視対象にする
+      // eslint-disable-next-line no-unused-vars
       this.$watch(key, (_) => this.updateUrlParams());
 
       // URLパラメータの指定がない場合は、コンポーネント側の初期値をそのまま使う
