@@ -85,6 +85,7 @@ function make_result(query, searchs) {
       wordid: x.wordid,
       title: word.cf,
       gw: word.gw,
+      meaning: word.meaning,
       pos: word.pos,
       url: word.url,
       id: word.id,

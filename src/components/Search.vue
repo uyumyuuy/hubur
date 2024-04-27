@@ -70,6 +70,7 @@
                       {{ word.title }} [{{ word.gw }}] ({{ word.pos }})</a
                     >
                   </p>
+                  <p>{{ word.meaning }}</p>
                 </header>
                 <h4 v-if="word.orth.length > 0">Orthography</h4>
                 <orthography

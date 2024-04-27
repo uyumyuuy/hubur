@@ -2,7 +2,7 @@ const FlexSearch = require("flexsearch");
 const fs = require("fs");
 const src = require("../src/assets/epsd2_src.json");
 
-let encoder = function(value) {
+let encoder = function (value) {
   value = value.toLowerCase();
   value = value.replace(/ŋ/g, "j");
   value = value.replace(/š/g, "sz");
@@ -79,7 +79,7 @@ src.forEach((word, wordid) => {
     wordid: wordid,
     id: newid(),
     tag: "meaning",
-    content: word.gw,
+    content: word.meaning,
     cuneiform: "",
     index: 0,
   });
@@ -154,14 +154,14 @@ console.log("titles");
 console.log(titles.info());
 fs.writeFileSync(
   __dirname + "/../src/assets/index_titles.json",
-  titles.export()
+  titles.export(),
 );
 
 console.log("meanings");
 console.log(meanings.info());
 fs.writeFileSync(
   __dirname + "/../src/assets/index_meanings.json",
-  meanings.export()
+  meanings.export(),
 );
 
 console.log("orths");
@@ -172,19 +172,19 @@ console.log("senses");
 console.log(senses.info());
 fs.writeFileSync(
   __dirname + "/../src/assets/index_senses.json",
-  senses.export()
+  senses.export(),
 );
 
 console.log("equivs");
 console.log(equivs.info());
 fs.writeFileSync(
   __dirname + "/../src/assets/index_equivs.json",
-  equivs.export()
+  equivs.export(),
 );
 
 console.log("phrases");
 console.log(phrases.info());
 fs.writeFileSync(
   __dirname + "/../src/assets/index_phrases.json",
-  phrases.export()
+  phrases.export(),
 );

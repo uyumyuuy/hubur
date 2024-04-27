@@ -135,6 +135,7 @@ function make_result(query, searchs) {
         wordid: x.wordid,
         title: word.cf,
         gw: word.gw,
+        meaning: word.meaning,
         pos: word.pos,
         url: word.url,
         id: word.id,
@@ -158,16 +159,13 @@ function make_result(query, searchs) {
         item.rank += 200 * cal_rank(item.title);
         break;
       case "meaning":
-        item.rank += 50 * cal_rank(item.gw);
+        item.rank += query.length;
         break;
       case "cf":
         item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
         item.orth.push(word.orth[x.index]);
         break;
       case "w":
-        if (x.wordid == "6934") {
-          console.log(word.orth[x.index].w);
-        }
         item.rank += 10 * cal_rank(word.orth[x.index].w);
         item.orth.push(word.orth[x.index]);
         break;
