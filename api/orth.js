@@ -83,6 +83,7 @@ function make_result(query, searchs) {
     const word = source[x.wordid];
     item = {
       wordid: x.wordid,
+      freq: word.freq,
       title: word.cf,
       gw: word.gw,
       meaning: word.meaning,
@@ -97,11 +98,13 @@ function make_result(query, searchs) {
       return 1 - Math.abs(val.length - query.length) / val.length;
     };
 
-    item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
+    item.rank = 10 * cal_rank(word.orth[x.index].cuneiform);
     item.orth = word.orth[x.index];
     data.push(item);
   });
-  return data.sort((a, b) => b.rank - a.rank);
+  return data.sort((a, b) =>
+    a.rank == b.rank ? b.freq - a.freq : b.rank - a.rank,
+  );
 }
 
 module.exports = (req, res) => {

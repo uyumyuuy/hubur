@@ -133,6 +133,7 @@ function make_result(query, searchs) {
     if (x.wordid != lastid) {
       item = {
         wordid: x.wordid,
+        freq: word.freq,
         title: word.cf,
         gw: word.gw,
         meaning: word.meaning,
@@ -156,25 +157,25 @@ function make_result(query, searchs) {
     let i, j, line;
     switch (x.tag) {
       case "title":
-        item.rank += 200 * cal_rank(item.title);
+        item.rank = Math.max(item.rank, 200 * cal_rank(item.title));
         break;
       case "meaning":
-        item.rank += query.length;
+        item.rank = Math.max(item.rank, query.length);
         break;
       case "cf":
-        item.rank += 10 * cal_rank(word.orth[x.index].cuneiform);
+        item.rank = Math.max(item.rank, 10 * cal_rank(word.orth[x.index].cuneiform));
         item.orth.push(word.orth[x.index]);
         break;
       case "w":
-        item.rank += 10 * cal_rank(word.orth[x.index].w);
+        item.rank = Math.max(item.rank, 10 * cal_rank(word.orth[x.index].w));
         item.orth.push(word.orth[x.index]);
         break;
       case "sense":
-        item.rank += 10 * cal_rank(word.senses[x.index]);
+        item.rank = Math.max(item.rank, 10 * cal_rank(word.senses[x.index]));
         item.senses.push(word.senses[x.index]);
         break;
       case "equivs":
-        item.rank += 10 * cal_rank(word.equivs[x.index]);
+        item.rank = Math.max(item.rank, 10 * cal_rank(word.equivs[x.index]));
         item.equivs.push(word.equivs[x.index]);
         break;
       case "phrase_title":
@@ -183,7 +184,7 @@ function make_result(query, searchs) {
             title: word.phrases[x.index].title,
             lines: [],
           };
-          item.rank += 10 * cal_rank(word.phrases[x.index].title);
+          item.rank = Math.max(item.rank, 10 * cal_rank(word.phrases[x.index].title));
         }
         break;
       case "phrase_sumer":
@@ -201,11 +202,13 @@ function make_result(query, searchs) {
           akk: word.phrases[i].lines[j].akk,
         };
         item.phrases[i].lines.push(line);
-        item.rank += 5;
+        item.rank = Math.max(item.rank, 5);
         break;
     }
   });
-  return data.sort((a, b) => b.rank - a.rank);
+  return data.sort((a, b) =>
+    a.rank == b.rank ? b.freq - a.freq : b.rank - a.rank,
+  );
 }
 
 module.exports = (req, res) => {

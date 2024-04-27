@@ -48,13 +48,17 @@ export default {
         newUrlParams[key] = `${this.$data[key]}`;
       });
 
-      this.$router.replace({
-        ...this.$route,
-        query: {
-          ...this.$route.query,
-          ...newUrlParams,
-        },
-      });
+      const newQuery = {
+        ...this.$route.query,
+        ...newUrlParams,
+      };
+
+      if (Object.toJSON(this.$route.query) != Object.toJSON(newQuery)) {
+        this.$router.replace({
+          ...this.$route,
+          query: newQuery,
+        });
+      }
     },
   },
 };
