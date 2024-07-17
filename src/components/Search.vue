@@ -66,7 +66,7 @@
               <div class="box">
                 <header>
                   <p>
-                    <a :href="word.url" :id="'w' + wordIndex" target="_blank">
+                    <a :href="url(word)" :id="'w' + wordIndex" target="_blank">
                       {{ word.title }} [{{ word.gw }}] ({{ word.pos }})</a
                     >
                   </p>
@@ -257,6 +257,10 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    url: function (word) {
+      const id = word.url[0].match(/o[0-9]+/)[0];
+      return `http://oracc.iaas.upenn.edu/epsd2/cbd/sux/${id}.html`;
     },
   },
   computed: {

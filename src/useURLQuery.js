@@ -53,7 +53,7 @@ export default {
         ...newUrlParams,
       };
 
-      if (Object.toJSON(this.$route.query) != Object.toJSON(newQuery)) {
+      if (JSON.stringify(this.$route.query) != JSON.stringify(newQuery)) {
         this.$router.replace({
           ...this.$route,
           query: newQuery,
