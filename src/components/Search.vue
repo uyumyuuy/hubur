@@ -66,7 +66,7 @@
               <div class="box">
                 <header>
                   <p>
-                    <a :href="url(word)" :id="'w' + wordIndex" target="_blank">
+                    <a :href="word.url" :id="'w' + wordIndex" target="_blank">
                       {{ word.title }} [{{ word.gw }}] ({{ word.pos }})</a
                     >
                   </p>
@@ -203,7 +203,7 @@ export default {
         page: this.page - 1,
         perpage: 20,
       });
-      console.log(query);
+
       this.searching = true;
       fetch("/api/search?" + query)
         .then((response) => {
@@ -231,7 +231,7 @@ export default {
           });
 
           this.searching = false;
-          console.log(data);
+
           this.maxPage = data.maxpage;
           this.results = data.data;
           this.totalFound = data.total;
