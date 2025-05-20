@@ -212,7 +212,7 @@ function make_result(query, searchs) {
 }
 
 module.exports = (req, res) => {
-  const query = req.query.text || "";
+  const query = req.query.text.replace("+", " ") || "";
   const targets = req.query.targets || [
     "title",
     "meaning",
