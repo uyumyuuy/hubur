@@ -45,5 +45,6 @@
     "vue-cli-plugin-buefy": "~0.3.8",
     "vue-router": "3.6.5",
     "vue-template-compiler": "^2.6.11"
-  }
+  },
+  "engines": {"node": "20.x"}
 }
