@@ -16,6 +16,12 @@
           <b-navbar-item href="https://qantuppi.kurnugia.com"
             >qantuppi</b-navbar-item
           >
+          <b-navbar-item href="https://eduba.kurnugia.com/app/"
+            >Eduba</b-navbar-item
+          >
+          <b-navbar-item href="https://nisaba-zami.kurnugia.com/"
+            >NIsaba-Zami</b-navbar-item
+          >
         </template>
       </b-navbar>
       <div class="container">
